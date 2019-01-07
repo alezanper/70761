@@ -51,3 +51,16 @@ PRINT CONCAT('Employee ', CAST(10 AS VARCHAR(10)), ' was not found.');
 SELECT CAST(CONTEXT_INFO() AS VARCHAR(128)) AS mycontextinfo;
 SELECT SESSION_CONTEXT(N'language') AS [language];
 SELECT NEWID() AS myguid;	--Generating a unique identifier
+
+--Arimethic Functions
+SELECT 9 / 2;	--4
+SELECT CAST(9 AS NUMERIC(12, 2)) / CAST(2 AS NUMERIC(12, 2));	--4.500000000000000
+
+SELECT RAND(1759);
+SELECT RAND();
+
+
+
+
+
+
