@@ -1,15 +1,14 @@
---Wildcards
-USE TSQLV4;
+USE TEST;
 
---First name starting with P or R
+--First name starting with A or B
 SELECT *
-FROM HR.Employees H
-WHERE H.firstname LIKE '[PR]%'
+FROM DB.people P
+WHERE p.name LIKE '[AB]%'
 
 --Filter by date
 SELECT *
-FROM HR.Employees H
-WHERE H.birthdate BETWEEN '19830101' and '19861231'
+FROM DB.PEOPLE P
+WHERE P.birthdate BETWEEN '19830101' and '19861231'
 
 --Order (default is descending)
 SELECT *
