@@ -12,31 +12,29 @@ WHERE P.birthdate BETWEEN '19830101' and '19861231'
 
 --Order (default is descending)
 SELECT *
-FROM HR.Employees H
-ORDER BY H.empid
+FROM DB.PEOPLE P
+ORDER BY p.lastname
 
 --Using Top(3)
-SELECT TOP (3) orderid, orderdate, custid, empid
-FROM Sales.Orders
-ORDER BY orderdate DESC;
+SELECT TOP (3) p.id, p.name, p.lastname, p.birthdate
+FROM DB.PEOPLE P
+ORDER BY p.birthdate DESC;
 
 --Using with ties (For returning all values)
-SELECT TOP (3) WITH TIES orderid, orderdate, custid, empid
-FROM Sales.Orders
-ORDER BY orderdate DESC;
+SELECT TOP (3) WITH TIES p.id, p.name, p.lastname, p.birthdate
+FROM DB.PEOPLE P
+ORDER BY p.birthdate DESC;
 
 --Using Percent
-SELECT TOP (1) PERCENT orderid, orderdate, custid, empid
-FROM Sales.Orders
-ORDER BY orderdate DESC;
+SELECT TOP (10) PERCENT p.id, p.name, p.lastname, p.birthdate
+FROM DB.PEOPLE P
+ORDER BY p.birthdate DESC;
 
---Using OFFSET-FETCH (Offset first 50 and return the next 25)
-SELECT orderid, orderdate, custid, empid
-FROM Sales.Orders
-ORDER BY orderdate DESC, orderid DESC
-OFFSET 50 ROWS FETCH NEXT 25 ROWS ONLY;
-
-USE TSQLV4;
+--Using OFFSET-FETCH (Offset first 5 and return the next 2)
+SELECT p.id, p.name, p.lastname, p.birthdate
+FROM DB.PEOPLE P
+ORDER BY p.birthdate DESC, p.id DESC
+OFFSET 5 ROWS FETCH NEXT 2 ROWS ONLY;
 
 --UNION and UNION ALL
 --71 ROWS (Implicit distinct)
