@@ -3,12 +3,12 @@ USE TEST;
 --First name starting with A or B
 SELECT *
 FROM DB.EMPLOYEES P
-WHERE p.name LIKE '[AB]%'
+WHERE p.name LIKE '[AB]%';
 
 --Filter by date
 SELECT *
 FROM DB.EMPLOYEES P
-WHERE P.birthdate BETWEEN '19830101' and '19861231'
+WHERE P.birthdate BETWEEN '19830101' and '19861231';
 
 --Order (default is descending)
 SELECT *
