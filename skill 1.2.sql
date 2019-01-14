@@ -1,36 +1,34 @@
---Join
-SELECT E.empid,
-E.firstname + N' ' + E.lastname AS emp,
-M.firstname + N' ' + M.lastname AS mgr
-FROM HR.Employees AS E
-INNER JOIN HR.Employees AS M
-ON E.mgrid = M.empid;
+USE TEST;
+--Join (It shows only matches)
+SELECT P.BOID, P.NAME, P.LASTNAME, E.JOBTITLE, E.HIREDATE, E.SALARY
+FROM DB.PEOPLE P 
+INNER JOIN DB.EMPLOYEES AS E
+ON E.BOID = P.BOID;
 
---Left Join (Full employees E including not match)
-SELECT E.empid,
-E.firstname + N' ' + E.lastname AS emp,
-M.firstname + N' ' + M.lastname AS mgr
-FROM HR.Employees AS E
-LEFT OUTER JOIN HR.Employees AS M
-ON E.mgrid = M.empid;
+--Left Join (Full people, including not employees. NULL for not employees)
+SELECT P.BOID, P.NAME, P.LASTNAME, E.JOBTITLE, E.HIREDATE, E.SALARY
+FROM DB.PEOPLE P 
+LEFT JOIN DB.EMPLOYEES AS E
+ON E.BOID = P.BOID;
 
---Using And on Join to add keys
+--Join does not includes nulls
+SELECT C.boid, E.JOBTITLE, E.HIREDATE, E.SALARY, E.LOCATION
+FROM DB.CLIENTS C
+INNER JOIN DB.EMPLOYEES AS E
+ON C.income = E.salary;
 
 -- Including null handling (low performance)
-SELECT EL.country, EL.region, EL.city, EL.numemps, CL.numcusts
-FROM dbo.EmpLocations AS EL
-INNER JOIN dbo.CustLocations AS CL
-ON EL.country = CL.country
-AND ISNULL(EL.region, N'<N/A>') = ISNULL(CL.region, N'<N/A>')
-AND EL.city = CL.city;
+SELECT C.boid, E.JOBTITLE, E.HIREDATE, E.SALARY, E.LOCATION
+FROM DB.CLIENTS C
+INNER JOIN DB.EMPLOYEES AS E
+ON ISNULL(C.income, 0) = ISNULL(E.salary, 0);
 
 -- (high performance)
-SELECT EL.country, EL.region, EL.city, EL.numemps, CL.numcusts
-FROM dbo.EmpLocations AS EL
-INNER MERGE JOIN dbo.CustLocations AS CL
-ON EL.country = CL.country
-AND (EL.region = CL.region OR (EL.region IS NULL AND CL.region IS NULL))
-AND EL.city = CL.city;
+SELECT C.boid, E.JOBTITLE, E.HIREDATE, E.SALARY, E.LOCATION
+FROM DB.CLIENTS C
+INNER JOIN DB.EMPLOYEES AS E
+ON C.income = E.salary
+OR (C.income IS NULL AND E.salary IS NULL);
 
 --Wrong query
 SELECT

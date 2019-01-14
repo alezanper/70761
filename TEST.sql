@@ -25,7 +25,7 @@ CREATE TABLE DB.PEOPLE
 --Multiple inserts
 INSERT INTO DB.PEOPLE(boid, ti, id, name, lastname, birthdate) VALUES
 (10000, 'C', 7975001, 'Alexander', 'Benavides', '19870620'),
-(10001, 'C', 2004501, 'Andrea', 'Torres', '19890623'),
+(10001, 'C', 2004501, 'Andrea', 'Torres', '19931112'),
 (10002, 'C', 7000203,'Mary', 'Martinez', '19860725'),
 (10003, 'R', 1040031,'Peter', 'Gutierrez', '19931112'),
 (10004, 'C', 2009004,'Juan', 'Ocampo', '19970923'),
@@ -49,47 +49,48 @@ CREATE TABLE DB.CLIENTS
 	segment		NVARCHAR(5) NOT NULL,
 	score		INT,
 	income		MONEY,
+	location    NVARCHAR(20),
 	CONSTRAINT PK_Client PRIMARY KEY(clientid),
 	CONSTRAINT FK_Person FOREIGN KEY(boid) REFERENCES DB.PEOPLE(boid)
 );
 
 --Multiple inserts
-INSERT INTO DB.CLIENTS(clientid, boid, segment, score, income) VALUES
-(100, 10005, 'Low', 900, 6500),
-(101, 10008, 'High', 100, 9500),
-(102, 10009, 'Low', 300, 3500),
-(103, 10010, 'High', 200, 14500),
-(104, 10011, 'Low', 900, 4500),
-(105, 10013, 'Med', 800, 9500);
+INSERT INTO DB.CLIENTS(clientid, boid, segment, score, income, location) VALUES
+(100, 10005, 'Low', 900, 6500, 'Bogotá'),
+(101, 10008, 'High', 100, 9500, 'Medellín'),
+(102, 10009, 'Low', 300, 5550, 'Bogotá'),
+(103, 10010, 'High', 200, 14500, 'Medellín'),
+(104, 10011, 'Low', 900, 4500, 'Cali'),
+(105, 10013, 'Med', 800, NULL, NULL);
 
 CREATE TABLE DB.EMPLOYEES
 (
 	boid		INT NOT NULL,
 	jobtitle	NVARCHAR(40) NOT NULL,
 	hiredate	DATE NOT NULL,
-	salary		MONEY NOT NULL,
+	salary		MONEY,
+	location	NVARCHAR(20),
 	CONSTRAINT PK_EMPLOYEE PRIMARY KEY(boid),
 	CONSTRAINT FK_PEOPLE_EMPLOYEE FOREIGN KEY(boid) REFERENCES DB.PEOPLE(boid)
-
 );
 
 --Multiple inserts
-INSERT INTO DB.EMPLOYEES(boid, jobtitle, hiredate, salary) VALUES
-(10000, 'Software Engineer', '20070325', 9000),
-(10001, 'Software Engineer', '20040510', 8200),
-(10002, 'Sales Representative', '20060825', 5700),
-(10003, 'Sales Representative', '20060725', 5500),
-(10004, 'Sales Manager', '20000315', 9500),
-(10006, 'Tester', '20090111', 6500),
-(10007, 'Software Engineer', '20111022', 6700),
-(10009, 'Tester', '20120521', 5500),
-(10010, 'CEO', '19980203', 13500),
-(10012, 'Sales Representative', '20050315', 4700),
-(10013, 'Architect TI', '20010921', 10500),
-(10014, 'Software Engineer', '20091202', 8900),
-(10015, 'Sales Representative', '20000812', 4900);
+INSERT INTO DB.EMPLOYEES(boid, jobtitle, hiredate, salary, location) VALUES
+(10000, 'Software Engineer', '20070325', 9000, 'Bogotá'),
+(10001, 'Software Engineer', '20040510', 8200, 'Medellín'),
+(10002, 'Sales Representative', '20060825', 5700, 'Bogotá'),
+(10003, 'Sales Representative', '20060725', 5500, 'Medellín'),
+(10004, 'Sales Manager', '20000315', 9500, 'Cali'),
+(10006, 'Tester', '20090111', 6500, 'Bogotá'),
+(10007, 'Software Engineer', '20111022', 6700, NULL),
+(10009, 'Tester', '20120521', 5550, 'Bogotá'),
+(10010, 'CEO', '19980203', 14500, 'Medellín'),
+(10012, 'Sales Representative', '20050315', 4700, 'Bogotá'),
+(10013, 'Architect TI', '20010921', NULL, NULL),
+(10014, 'Software Engineer', '20091202', 8900, 'Bogotá'),
+(10015, 'Sales Representative', '20000812', 4900, 'Medellín');
 
-CREATE TABLE DB.contact
+CREATE TABLE DB.CONTACT
 (
 	contactid	INT NOT NULL,
 	boid		INT NOT NULL,
