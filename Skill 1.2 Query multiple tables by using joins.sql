@@ -23,34 +23,18 @@ FROM DB.CLIENTS C
 INNER JOIN DB.EMPLOYEES AS E
 ON ISNULL(C.income, 0) = ISNULL(E.salary, 0);
 
--- (high performance)
+--(high performance)
 SELECT C.boid, E.JOBTITLE, E.HIREDATE, E.SALARY, E.LOCATION
 FROM DB.CLIENTS C
 INNER JOIN DB.EMPLOYEES AS E
 ON C.income = E.salary
 OR (C.income IS NULL AND E.salary IS NULL);
 
---Wrong query
-SELECT
-S.companyname AS supplier, S.country,
-P.productid, P.productname, P.unitprice,
-C.categoryname
-FROM Production.Suppliers AS S
-LEFT OUTER JOIN Production.Products AS P
-ON S.supplierid = P.supplierid
-INNER JOIN Production.Categories AS C
-ON C.categoryid = P.categoryid
-WHERE S.country = N'Japan';
-
---Correct query
-SELECT
-S.companyname AS supplier, S.country,
-P.productid, P.productname, P.unitprice,
-C.categoryname
-FROM Production.Suppliers AS S
-LEFT OUTER JOIN
-(Production.Products AS P
-INNER JOIN Production.Categories AS C
-ON C.categoryid = P.categoryid)
-ON S.supplierid = P.supplierid
-WHERE S.country = N'Japan';
+--Multi Join
+SELECT P.*, C.income, T.contact, T.contacttype 
+FROM DB.PEOPLE P 
+JOIN DB.CLIENTS C
+ON P.boid = C.BOID
+JOIN DB.CONTACT T
+ON P.boid = T.boid
+WHERE T.contacttype = 'A';
