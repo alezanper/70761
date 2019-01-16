@@ -54,20 +54,36 @@ SELECT COALESCE(@x, @y) AS [COALESCE], ISNULL(@x, @y) AS [ISNULL];
 ---------------------
 --@@ROWCOUNT
 --returns the number of rows affected by the last statement that you executed.
-SELECT empid, firstname, lastname
-	FROM HR.Employees
-WHERE empid = 10;
+SELECT P.boid, P.ti, P.name, P.lastname
+	FROM DB.PEOPLE P
+WHERE P.boid = 11102;
 IF @@ROWCOUNT = 0
-PRINT CONCAT('Employee ', CAST(10 AS VARCHAR(10)), ' was not found.');
+PRINT CONCAT('Employee ', CAST(11102 AS VARCHAR(10)), ' was not found.');
 
 --Context info
 SELECT CAST(CONTEXT_INFO() AS VARCHAR(128)) AS mycontextinfo;
 SELECT SESSION_CONTEXT(N'language') AS [language];
 SELECT NEWID() AS myguid;	--Generating a unique identifier
 
---Arimethic Functions
-SELECT 9 / 2;	--4
+-------------------------
+---Arimethic Functions---
+-------------------------
+SELECT 11 / 2;	--5
 SELECT CAST(9 AS NUMERIC(12, 2)) / CAST(2 AS NUMERIC(12, 2));	--4.500000000000000
 
+--Using seed
 SELECT RAND(1759);
 SELECT RAND();
+
+-------------------------
+---Aggregate functions---
+-------------------------
+SELECT E.jobtitle, count(1) Total
+	FROM DB.EMPLOYEES E
+GROUP BY E.jobtitle
+ORDER BY 2 DESC
+
+SELECT E.jobtitle, SUM(E.salary) Total_Salary
+	FROM DB.EMPLOYEES E
+GROUP BY E.jobtitle
+ORDER BY 2 DESC
