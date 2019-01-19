@@ -53,25 +53,33 @@ GO;
 
 SELECT * FROM DB.VW_FULL_CLIENTS;
 
-
---Return table 
-DROP FUNCTION IF EXISTS HR.GetManagers;
+--------------------------------
+---Function to return a table---
+--------------------------------
+DROP FUNCTION IF EXISTS DB.GetTeam;
 GO
-CREATE FUNCTION HR.GetManagers(@empid AS INT) RETURNS TABLE
+CREATE FUNCTION DB.GetTeam(@jobtitle AS NVARCHAR(50)) RETURNS TABLE
 AS
 RETURN
-WITH EmpsCTE AS
+WITH Full_Employees AS
 (
-SELECT empid, mgrid, firstname, lastname, 0 AS distance
-FROM HR.Employees
-WHERE empid = @empid
-UNION ALL
-SELECT M.empid, M.mgrid, M.firstname, M.lastname, S.distance + 1 AS distance
-FROM EmpsCTE AS S
-JOIN HR.Employees AS M
-ON S.mgrid = M.empid
+SELECT 
+P.boid,
+P.ti,
+P.id,
+P.name,
+P.lastname,
+E.jobtitle,
+E.salary
+ FROM DB.EMPLOYEES E
+JOIN DB.PEOPLE P
+ON E.boid = P.boid
+WHERE E.jobtitle = @jobtitle
 )
-SELECT empid, mgrid, firstname, lastname, distance
-FROM EmpsCTE;
-GO
+SELECT *
+FROM Full_Employees;
 
+--Get Team testers
+SELECT *
+FROM DB.GetTeam('Software Engineer') AS M;
+GO
