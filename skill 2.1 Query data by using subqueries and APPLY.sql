@@ -1,19 +1,19 @@
-USE TSQLV4;
+USE TEST;
 
 --Using subqueries (single value)
-SELECT productid, productname, unitprice
-FROM Production.Products
-WHERE unitprice =
-(SELECT MIN(unitprice)
-FROM Production.Products);
+SELECT P.boid, P.name, P.lastname, P.birthdate
+FROM DB.PEOPLE P
+WHERE P.birthdate =
+(SELECT MIN(P.birthdate)
+FROM DB.PEOPLE P);
 
 --Using subqueries (multiple values)
-SELECT productid, productname, unitprice
-FROM Production.Products
-WHERE supplierid IN
-(SELECT supplierid
-FROM Production.Suppliers
-WHERE country = N'Japan');
+SELECT C.clientid, C.boid, C.location 
+FROM DB.CLIENTS C
+WHERE C.clientid IN
+(SELECT C.clientid 
+FROM DB.CLIENTS C
+WHERE C.location = N'Bogotá')
 
 --Using ALL operator
 SELECT productid, productname, unitprice
@@ -59,10 +59,3 @@ FROM Production.Products AS P
 WHERE P.supplierid = S.supplierid
 ORDER BY unitprice, productid) AS A
 WHERE S.country = N'Japan';
-
-
-
-
-
-
-
