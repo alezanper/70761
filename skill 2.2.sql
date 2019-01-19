@@ -1,61 +1,58 @@
-USE TSQLV4;
+USE TEST;
 
---Derived tables
+--------------------
+---Derived tables---
+--------------------
 SELECT
-ROW_NUMBER() OVER(PARTITION BY categoryid
-ORDER BY unitprice, productid) AS rownum,
-categoryid, productid, productname, unitprice
-FROM Production.Products;
+ROW_NUMBER() OVER(PARTITION BY E.jobtitle
+ORDER BY E.jobtitle) AS rownum,
+E.boid, e.jobtitle, e.location
+FROM DB.EMPLOYEES E;
 
---Common table expressions
+------------------------------
+---Common table expressions---
+------------------------------
 --Using a single table expression
-WITH <CTE_name>
-AS
+WITH FULL_CLIENTS AS
 (
-<inner_query>
+SELECT C.boid, 
+P.name, 
+P.lastname, 
+P.ti, P.id, 
+C.income, 
+C.location, 
+C.score, 
+C.segment
+FROM DB.CLIENTS C
+JOIN DB.PEOPLE P
+ON C.boid = P.boid
 )
-<outer_query>;
+SELECT F.boid, F.name, F.lastname, F.score
+FROM FULL_CLIENTS F;
 
---Using multiple table expressions
-WITH C1 AS
-(
-SELECT ...
-FROM T1
-WHERE ...
-),
-C2 AS
-(
-SELECT
-FROM C1
-WHERE ...
-)
-SELECT ...
-FROM C2
-WHERE ...;
-
---Example
-WITH C AS
-(
-SELECT ROW_NUMBER() OVER(PARTITION BY categoryid
-ORDER BY unitprice, productid) AS rownum,
-categoryid, productid, productname, unitprice
-FROM Production.Products
-)
-SELECT categoryid, productid, productname, unitprice
-FROM C
-WHERE rownum <= 2;
-
---Views and inline table-valued functions--
-DROP VIEW IF EXISTS Sales.RankedProducts;
+---------------------------------------------
+---Views and inline table-valued functions---
+---------------------------------------------
+DROP VIEW IF EXISTS DB.VW_FULL_CLIENTS;
 GO
-CREATE VIEW Sales.RankedProducts
+
+CREATE VIEW DB.VW_FULL_CLIENTS
 AS
-SELECT
-ROW_NUMBER() OVER(PARTITION BY categoryid
-ORDER BY unitprice, productid) AS rownum,
-categoryid, productid, productname, unitprice
-FROM Production.Products;
-GO
+SELECT C.boid, 
+P.name, 
+P.lastname, 
+P.ti, P.id, 
+C.income, 
+C.location, 
+C.score, 
+C.segment
+FROM DB.CLIENTS C
+JOIN DB.PEOPLE P
+ON C.boid = P.boid
+GO;
+
+SELECT * FROM DB.VW_FULL_CLIENTS;
+
 
 --Return table 
 DROP FUNCTION IF EXISTS HR.GetManagers;
