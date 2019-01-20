@@ -1,33 +1,39 @@
-USE TSQLV4;
+USE TEST;
 
---Group by shipperid
-SELECT shipperid,
-	COUNT(*) AS numorders,	--Count full
-	COUNT(shippeddate) AS shippedorders,	--Count not nulls
-	MIN(shippeddate) AS firstshipdate,
-	MAX(shippeddate) AS lastshipdate,
-	SUM(val) AS totalvalue
-FROM Sales.OrderValues
-GROUP BY shipperid;
+---------------------------
+---Using GROUP Functions---
+---------------------------
+SELECT E.jobtitle,
+	COUNT(*) AS TotalEmployees,				--Count full
+	COUNT(E.salary) AS LocationNotNull,	--Count not nulls
+	MIN(E.salary) AS lowestSalary,
+	MAX(E.salary) AS HighestSalary,
+	SUM(E.salary) AS totalSalaries
+FROM DB.EMPLOYEES E
+GROUP BY E.jobtitle;
 
---Working with multiple grouping sets
-SELECT shipperid, YEAR(shippeddate) AS shipyear, COUNT(*) AS numorders
-FROM Sales.Orders
-WHERE shippeddate IS NOT NULL -- exclude unshipped orders
+-------------------------
+---Using Grouping Sets---
+-------------------------
+SELECT e.jobtitle, E.location, COUNT(*) AS Total
+FROM  DB.EMPLOYEES E
 GROUP BY GROUPING SETS
 (
-( shipperid, YEAR(shippeddate) ),
-( shipperid ),
-( YEAR(shippeddate) ),
+( e.jobtitle, E.location ),
+( e.jobtitle ),
+( E.location ),
 ( )
-);
+)
+ORDER BY 1, 3
 
---Using CUBE
+----------------
+---Using CUBE---
+----------------
 --Cube generates all posibilities
-SELECT shipperid, YEAR(shippeddate) AS shipyear, COUNT(*) AS numorders
-FROM Sales.Orders
-WHERE shippeddate IS NOT NULL
-GROUP BY CUBE( shipperid, YEAR(shippeddate) );
+SELECT e.jobtitle, E.location, COUNT(*) AS Total
+FROM  DB.EMPLOYEES E
+GROUP BY CUBE( e.jobtitle, E.location )
+ORDER BY 1, 3;
 
 --Using ROLLUP
 --Rollup makes all possible combinations when there’s a natural hierarchy
@@ -94,16 +100,3 @@ ORDER BY orderdate, orderid) AS prev_val,
 LEAD(val) OVER(PARTITION BY custid
 ORDER BY orderdate, orderid) AS next_val
 FROM Sales.OrderValues;
-
-
-
-
-
-
-
-
-
-
-
-
-
