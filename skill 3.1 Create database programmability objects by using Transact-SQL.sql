@@ -1,28 +1,26 @@
-USE TSQLV4;
+USE TEST;
 
---VIEWS--
---You can modify data through view wit appropiate permissions
+-----------
+---VIEWS---
+-----------
+--You can modify data through view with appropiate permissions
 --You can add indexes to views
+--You can't use order by in query
 GO
-CREATE OR ALTER VIEW Sales.OrderTotals
+CREATE OR ALTER VIEW DB.TotalSalary
 --prevents structural changes to underlying objects while the view exists
 WITH SCHEMABINDING
 AS
-SELECT
-O.orderid, O.custid, O.empid, O.shipperid, O.orderdate,
-O.requireddate, O.shippeddate,
-SUM(OD.qty) AS qty,
-CAST(SUM(OD.qty * OD.unitprice * (1 - OD.discount))
-AS NUMERIC(12, 2)) AS val
-FROM Sales.Orders AS O
-INNER JOIN Sales.OrderDetails AS OD
-ON O.orderid = OD.orderid
-GROUP BY
-O.orderid, O.custid, O.empid, O.shipperid, O.orderdate,
-O.requireddate, O.shippeddate;
-GO
+SELECT E.jobtitle, SUM(E.salary) Total_Salary
+	FROM DB.EMPLOYEES E
+GROUP BY E.jobtitle
+GO;
 
---User-defined functions--
+SELECT * FROM DB.TotalSalary;
+
+----------------------------
+---User-defined functions---
+----------------------------
 --You cannot:
 --Use error handling
 --Modify data (other than in table variables)
