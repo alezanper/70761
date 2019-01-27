@@ -1,36 +1,58 @@
-USE TSQLV4;
+USE TEST;
 
---System-versioned temporal tables
-CREATE TABLE dbo.Products
+------------------------------------
+--System-versioned temporal tables--
+------------------------------------
+
+--Run if you want to drop tables
+ALTER TABLE DB.PETS SET (SYSTEM_VERSIONING = OFF);
+DROP TABLE db.PetsHistory;
+DROP TABLE DB.PETS;
+
+--Creating table with history control
+CREATE TABLE DB.PETS
 (
-	productid INT NOT NULL CONSTRAINT PK_dboProducts PRIMARY KEY(productid),
-	productname NVARCHAR(40) NOT NULL,
-	supplierid INT NOT NULL,
-	categoryid INT NOT NULL,
-	unitprice MONEY NOT NULL,
+	petid INT NOT NULL CONSTRAINT PK_pets PRIMARY KEY(petid),
+	petname NVARCHAR(30) NOT NULL,
+	petprice MONEY NOT NULL,
 	-- below are additions related to temporal table
 	validfrom DATETIME2(3) GENERATED ALWAYS AS ROW START HIDDEN NOT NULL,
 	validto DATETIME2(3)
 	GENERATED ALWAYS AS ROW END HIDDEN NOT NULL,
 	PERIOD FOR SYSTEM_TIME (validfrom, validto)
 )
-WITH ( SYSTEM_VERSIONING = ON ( HISTORY_TABLE = dbo.ProductsHistory ) );
+WITH ( SYSTEM_VERSIONING = ON ( HISTORY_TABLE = db.PetsHistory ) );
 
---Modifying data
+--Adding information
+INSERT INTO DB.PETS(petid, petname, petprice) VALUES
+(80000, 'Spike', 1000),
+(80001, 'Kylie', 800),
+(80002, 'kaiser', 1100),
+(80003, 'Kenay', 1200),
+(80004, 'Alexa', 900),
+(80005, 'Madara', 1500);
+
+--Checking Information
+SELECT * FROM DB.PETS;
+
+
+--Modifying data for checking 
 BEGIN TRAN;
-PRINT CAST(SYSUTCDATETIME() AS DATETIME2(3));
-UPDATE dbo.Products
-SET unitprice *= 0.95
-WHERE productid = 1;
-WAITFOR DELAY '00:00:05.000';
-UPDATE dbo.Products
-SET unitprice *= 0.90
-WHERE productid = 2;
-WAITFOR DELAY '00:00:05.000';
-UPDATE dbo.Products
-SET unitprice *= 0.85
-WHERE productid = 3;
+UPDATE DB.PETS
+SET petprice *= 1.1
+WHERE petid = 80004;
+--WAITFOR DELAY '00:00:05.000';
+UPDATE DB.PETS
+SET petprice *= 0.97
+WHERE petid = 80003;
+--WAITFOR DELAY '00:00:05.000';
+UPDATE DB.PETS
+SET petname = 'Manchas'
+WHERE petid = 80001;
 COMMIT TRAN;
+
+--Checking for changes
+SELECT * FROM DB.PETSHISTORY;
 
 --Producing and using XML in queries
 SELECT Customer.custid, Customer.companyname,
