@@ -54,32 +54,29 @@ COMMIT TRAN;
 --Checking for changes
 SELECT * FROM DB.PETSHISTORY;
 
---Producing and using XML in queries
-SELECT Customer.custid, Customer.companyname,
-[Order].orderid, [Order].orderdate
-FROM Sales.Customers AS Customer
-INNER JOIN Sales.Orders AS [Order]
-ON Customer.custid = [Order].custid
-WHERE Customer.custid <= 2
-AND [Order].orderid %2 = 0
-ORDER BY Customer.custid, [Order].orderid
+----------------------------------------
+--Producing and using XML in queries----
+----------------------------------------
+SELECT	C.boid,
+		C.clientid,
+		C.income,
+		C.location,
+		C.score,
+		C.segment
+FROM DB.CLIENTS C
 FOR XML RAW;
 
 --Using AUTO 
-WITH XMLNAMESPACES('ER70761-CustomersOrders' AS co)
-SELECT [co:Customer].custid AS [co:custid],
-[co:Customer].companyname AS [co:companyname],
-[co:Order].orderid AS [co:orderid],
-[co:Order].orderdate AS [co:orderdate]
-FROM Sales.Customers AS [co:Customer]
-INNER JOIN Sales.Orders AS [co:Order]
-ON [co:Customer].custid = [co:Order].custid
-WHERE [co:Customer].custid <= 2
-AND [co:Order].orderid %2 = 0
-ORDER BY [co:Customer].custid, [co:Order].orderid
-FOR XML AUTO, ELEMENTS, ROOT('CustomersOrders');
+WITH XMLNAMESPACES('TEST-EMPLOYEES' AS EMP)
+SELECT	[EMP:EMPLOYEE].boid AS [EMP:BOID],
+		[EMP:EMPLOYEE].jobtitle AS [EMP:JOBTITLE],
+		[EMP:EMPLOYEE].salary AS [EMP:SALARY]
+FROM DB.EMPLOYEES AS [EMP:EMPLOYEE]
+FOR XML AUTO, ELEMENTS, ROOT('EMPLOYEES');
 
---Querying XML data with XQuery
+-----------------------------------
+---Querying XML data with XQuery---
+-----------------------------------
 DECLARE @x AS XML = N'
 <CustomersOrders>
 	<Customer custid="1">
@@ -117,51 +114,53 @@ return
 </Order-orderid-element>')
 AS [Filtered, sorted and reformatted orders with let clause];
 
---Query and output JSON data
-SELECT Customer.custid, Customer.companyname,
-[Order].orderid, [Order].orderdate
-FROM Sales.Customers AS Customer
-INNER JOIN Sales.Orders AS [Order]
-ON Customer.custid = [Order].custid
-WHERE Customer.custid <= 2
-AND [Order].orderid %2 = 0
-ORDER BY Customer.custid, [Order].orderid
+--------------------------------
+---Query and output JSON data---
+--------------------------------
+SELECT	C.boid,
+		C.clientid,
+		C.income,
+		C.location,
+		C.score,
+		C.segment
+FROM DB.CLIENTS C
 FOR JSON AUTO;
 
 --Using PATH clause
-SELECT custid AS [CustomerId],
-companyname AS [Company],
-contactname AS [Contact.Name]
-FROM Sales.Customers
-WHERE custid = 1
+SELECT	C.boid,
+		C.clientid,
+		C.income,
+		C.location,
+		C.score,
+		C.segment
+FROM DB.CLIENTS C
 FOR JSON PATH;
 
---Convert JSON data to tabular format
+----------------------------------------
+---Convert JSON data to tabular format--
+----------------------------------------
 DECLARE @json AS NVARCHAR(MAX) = N'
 {
-"Customer":{
-"Id":1,
-"Name":"Customer NRZBB",
-"Order":{
-"Id":10692,
-"Date":"2015-10-03",
-"Delivery":null
+"Person":{
+"boid":10000,
+"personal":{
+"Id":20000,
+"Bithdate":"2019-01-26"
 }
 }
 }';
 SELECT *
 FROM OPENJSON(@json);
 
---Adding properties
+--Adding properties, it is case sensitive
 DECLARE @json AS NVARCHAR(MAX) = N'
 {
-"Customer":{
-"Id":1,
-"Name":"Customer NRZBB",
-"Order":{
-"Id":10692,
-"Date":"2015-10-03",
-"Delivery":null
+"Person":{
+"name":"Alex",
+"boid":10000,
+"personal":{
+"Id":20000,
+"Bithdate":"2019-01-26"
 }
 }
 }';
@@ -169,8 +168,7 @@ SELECT *
 FROM OPENJSON(@json)
 WITH
 (
-CustomerId INT '$.Customer.Id',
-CustomerName NVARCHAR(20) '$.Customer.Name',
-Orders NVARCHAR(MAX) '$.Customer.Order' AS JSON
+BOID INT '$.Person.boid',
+PersonName NVARCHAR(20) '$.Person.name',
+Personal NVARCHAR(MAX) '$.Person.personal' AS JSON
 );
-
