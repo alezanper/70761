@@ -29,42 +29,32 @@ SELECT * FROM DB.TotalSalary;
 --Use dynamic SQL
 
 --Scalar user-defined functions--
-CREATE OR ALTER FUNCTION dbo.SubtreeTotalSalaries(@mgr AS INT)
+CREATE OR ALTER FUNCTION db.GetTotalSalary(@location AS NVARCHAR(30))
 RETURNS MONEY
 WITH SCHEMABINDING
 AS
 BEGIN
 DECLARE @totalsalary AS MONEY;
-WITH EmpsCTE AS
+WITH Emps AS
 (
-SELECT empid, salary
-FROM dbo.Employees
-WHERE empid = @mgr
-UNION ALL
-SELECT S.empid, S.salary
-FROM EmpsCTE AS M
-INNER JOIN dbo.Employees AS S
-ON S.mgrid = M.empid
+SELECT E.salary, E.location
+FROM DB.EMPLOYEES E
+WHERE E.location = @location
 )
 SELECT @totalsalary = SUM(salary)
-FROM EmpsCTE;
+FROM Emps;
 RETURN @totalsalary;
 END;
 GO
 
---Other example
-CREATE OR ALTER FUNCTION dbo.MySYSDATETIME() RETURNS DATETIME2
-AS
-BEGIN
-RETURN SYSDATETIME();
-END;
-GO
+--Testing
+SELECT db.GetTotalSalary('Bogotá') AS TotalSalary;
 
-SELECT dbo.SubtreeTotalSalaries(8) AS subtreetotal;
-
---Build in
-SELECT orderid, SYSDATETIME() AS [SYSDATETIME], RAND() AS [RAND], NEWID() AS [NEWID]
-FROM Sales.Orders;
+------------------------
+---Build in Functions---
+------------------------
+SELECT E.boid, SYSDATETIME() AS [SYSDATETIME], RAND() AS [RAND], NEWID() AS [NEWID]
+FROM db.EMPLOYEES E;
 
 ----------------------------------------------
 --Inline table-valued user-defined functions--
@@ -88,6 +78,28 @@ SELECT rownum, orderid, orderdate, custid, empid
 FROM C
 WHERE rownum BETWEEN (@pagenum - 1) * @pagesize + 1 AND @pagenum * @pagesize;
 GO
+
+
+CREATE OR ALTER FUNCTION dbo.GetPage(@pagenum AS BIGINT, @pagesize AS BIGINT)
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN
+WITH C AS
+(
+SELECT ROW_NUMBER() OVER(ORDER BY orderdate, orderid) AS rownum,
+orderid, orderdate, custid, empid
+FROM Sales.Orders
+)
+SELECT rownum, orderid, orderdate, custid, empid
+FROM C
+WHERE rownum BETWEEN (@pagenum - 1) * @pagesize + 1 AND @pagenum * @pagesize;
+GO
+
+
+
+
+
 
 --For running use:
 SELECT rownum, orderid, orderdate, custid, empid
