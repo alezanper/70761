@@ -62,50 +62,33 @@ FROM db.EMPLOYEES E;
 --is very similar in concept to a view in the sense
 --that it’s based on a single query, and you interact with it like a table expression, only unlike a
 --view, it supports input parameters.
-
-CREATE OR ALTER FUNCTION dbo.GetPage(@pagenum AS BIGINT, @pagesize AS BIGINT)
+CREATE OR ALTER FUNCTION db.GetPage(@startrow AS BIGINT, @endrow AS BIGINT)
 RETURNS TABLE
 WITH SCHEMABINDING
 AS
 RETURN
 WITH C AS
 (
-SELECT ROW_NUMBER() OVER(ORDER BY orderdate, orderid) AS rownum,
-orderid, orderdate, custid, empid
-FROM Sales.Orders
+SELECT ROW_NUMBER() OVER (ORDER BY P.boid) rownum, 
+P.boid, 
+P.ti, 
+P.id, 
+P.name, 
+P.lastname
+FROM DB.PEOPLE P
 )
-SELECT rownum, orderid, orderdate, custid, empid
+SELECT rownum, boid, ti, id, name, lastname
 FROM C
-WHERE rownum BETWEEN (@pagenum - 1) * @pagesize + 1 AND @pagenum * @pagesize;
+WHERE rownum BETWEEN @startrow AND @endrow;
 GO
-
-
-CREATE OR ALTER FUNCTION dbo.GetPage(@pagenum AS BIGINT, @pagesize AS BIGINT)
-RETURNS TABLE
-WITH SCHEMABINDING
-AS
-RETURN
-WITH C AS
-(
-SELECT ROW_NUMBER() OVER(ORDER BY orderdate, orderid) AS rownum,
-orderid, orderdate, custid, empid
-FROM Sales.Orders
-)
-SELECT rownum, orderid, orderdate, custid, empid
-FROM C
-WHERE rownum BETWEEN (@pagenum - 1) * @pagesize + 1 AND @pagenum * @pagesize;
-GO
-
-
-
-
-
 
 --For running use:
-SELECT rownum, orderid, orderdate, custid, empid
-FROM dbo.GetPage(3, 12) AS T;
+SELECT rownum, boid, ti, id, name, lastname
+FROM db.GetPage(2, 10) AS T;
 
---Stored procedures--
+-----------------------
+---Stored procedures---
+-----------------------
 CREATE OR ALTER PROC dbo.GetOrders
 @orderid AS INT = NULL,
 @orderdate AS DATE = NULL,
