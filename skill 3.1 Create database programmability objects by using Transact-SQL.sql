@@ -13,8 +13,7 @@ WITH SCHEMABINDING
 AS
 SELECT E.jobtitle, SUM(E.salary) Total_Salary
 	FROM DB.EMPLOYEES E
-GROUP BY E.jobtitle
-GO;
+GROUP BY E.jobtitle;
 
 SELECT * FROM DB.TotalSalary;
 
