@@ -7,7 +7,7 @@ USE TEST;
 --You can add indexes to views
 --You can't use order by in query
 GO
-CREATE OR ALTER VIEW DB.TotalSalary
+CREATE OR ALTER VIEW DB.VW_TotalSalary
 --prevents structural changes to underlying objects while the view exists
 WITH SCHEMABINDING
 AS
@@ -15,7 +15,7 @@ SELECT E.jobtitle, SUM(E.salary) Total_Salary
 	FROM DB.EMPLOYEES E
 GROUP BY E.jobtitle;
 
-SELECT * FROM DB.TotalSalary;
+SELECT * FROM DB.VW_TotalSalary;
 
 ----------------------------
 ---User-defined functions---
@@ -88,75 +88,86 @@ FROM db.GetPage(2, 10) AS T;
 -----------------------
 ---Stored procedures---
 -----------------------
-CREATE OR ALTER PROC dbo.GetOrders
-@orderid AS INT = NULL,
-@orderdate AS DATE = NULL,
-@custid AS INT = NULL,
-@empid AS INT = NULL
+CREATE OR ALTER PROC db.GetClient
+@boid AS INT = NULL
 AS
 SET XACT_ABORT, NOCOUNT ON;
-SELECT orderid, orderdate, shippeddate, custid, empid, shipperid
-FROM Sales.Orders
-WHERE (orderid = @orderid OR @orderid IS NULL)
-AND (orderdate = @orderdate OR @orderdate IS NULL)
-AND (custid = @custid OR @custid IS NULL)
-AND (empid = @empid OR @empid IS NULL);
+
+SELECT C.BOID, P.name, P.lastname, C.income, C.location FROM DB.CLIENTS C JOIN
+DB.PEOPLE P ON
+C.boid = P.boid
+WHERE (C.boid = @boid OR @boid IS NULL)
 GO
 
 --For running use
-EXEC dbo.GetOrders @orderdate = '20151111', @custid = 85;
-EXEC dbo.GetOrders DEFAULT, '20151111', 85, DEFAULT;
+EXEC db.GetClient @boid = '10005';
+EXEC db.GetClient DEFAULT;
 
---Using cursors--
-DROP TABLE IF EXISTS dbo.Transactions;
+-------------
+---Cursors---
+-------------
+DROP TABLE IF EXISTS db.Totalsum;
 GO
-CREATE TABLE dbo.Transactions
+CREATE TABLE db.Totalsum
 (
-txid INT NOT NULL CONSTRAINT PK_Transactions PRIMARY KEY,
+id INT NOT NULL CONSTRAINT PK_TotalSum PRIMARY KEY,
 qty INT NOT NULL,
-depletionqty INT NULL
+tripleqty INT NULL
 );
 GO
 
-TRUNCATE TABLE dbo.Transactions;
-INSERT INTO dbo.Transactions(txid, qty)
-VALUES(1,2),(2,5),(3,4),(4,1),(5,10),(6,3),(7,1),(8,2),(9,1),(10,2),(11,1),(12,9);
+--Including values
+TRUNCATE TABLE db.Totalsum;
+INSERT INTO db.Totalsum(id, qty)
+VALUES(100,3),(101,4),(102,5),(103,5),(104,1),(105,12),(106,13),(107,9),(108,1),(109,10),(110,12),(111,14),(112,9);
 
-CREATE OR ALTER PROC dbo.ComputeDepletionQuantities
-@maxallowedqty AS INT
+--Using cursor on procedure
+CREATE OR ALTER PROC db.Computetriple
+@max AS INT
 AS
 SET XACT_ABORT, NOCOUNT ON;
-UPDATE dbo.Transactions
-SET depletionqty = NULL
-WHERE depletionqty IS NOT NULL;
-DECLARE @qty AS INT, @sumqty AS INT = 0;
+
+DECLARE 
+@qty AS INT, 
+@tripleqty AS INT = 0;
+
 DECLARE C CURSOR FOR
 SELECT qty
-FROM dbo.Transactions
-ORDER BY txid;
+FROM db.Totalsum
+ORDER BY id;
+
 OPEN C;
+
 FETCH NEXT FROM C INTO @qty;
 WHILE @@FETCH_STATUS = 0
 BEGIN
-SET @sumqty += @qty;
-IF @sumqty > @maxallowedqty
+SET @tripleqty = 3*@qty;
+
+IF @tripleqty <= @max
 BEGIN
-UPDATE dbo.Transactions
-SET depletionqty = @sumqty
+UPDATE db.Totalsum
+SET tripleqty = @tripleqty
 WHERE CURRENT OF C;
-SET @sumqty = 0;
+SET @tripleqty = 0;
 END;
+ELSE
+BEGIN
+UPDATE db.Totalsum
+SET tripleqty = @max
+WHERE CURRENT OF C;
+SET @tripleqty = 0;
+END;
+
 FETCH NEXT FROM C INTO @qty;
 END;
 CLOSE C;
 DEALLOCATE C;
-SELECT txid, qty, depletionqty,
-SUM(qty - ISNULL(depletionqty, 0))
-OVER(ORDER BY txid ROWS UNBOUNDED PRECEDING) AS totalqty
-FROM dbo.Transactions
-ORDER BY txid;
-GO
 
+--Checking table
+SELECT * FROM DB.Totalsum;
 
+--Running procedure for 30
+EXEC DB.Computetriple 30;
 
-
+--Checking Again
+SELECT * FROM DB.Totalsum;
